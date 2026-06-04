@@ -72,12 +72,19 @@ Our backend is built with **FastAPI** and **Supabase** (Postgres DB + Storage). 
 
 ---
 
+## 🔑 Test Credentials
+For local development and testing of authentication/frontend features, you can use:
+- **Email:** `user123@gmail.com`
+- **Password:** `123456`
+
+---
+
 ## 📝 TODO List
 
 Below is the roadmap of tasks for the team. Check them off as they are completed:
 
 ### 🎨 Frontend & Design
-- [ ] **Streamlit Frontend**:
+- [x] **Streamlit Frontend**:
   - Connect all pages to the backend REST API endpoints.
   - Implement dynamic pages for user authentication (Login/Register).
   - Build UI for uploading video files and querying advanced AI search.

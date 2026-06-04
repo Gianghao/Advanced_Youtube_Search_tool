@@ -98,6 +98,13 @@ The Streamlit app will launch and open in your default browser at `http://localh
 
 ---
 
+## 🔑 Test Credentials
+For testing and login functionality, you can use the following default credentials:
+- **Email:** `user123@gmail.com`
+- **Password:** `123456`
+
+---
+
 ## 🧪 Running Unit Tests
 Unit tests use `pytest` with mocked Supabase clients (no active Supabase connection is required to run tests):
 
