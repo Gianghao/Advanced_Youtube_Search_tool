@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, status
-from backend.app.models.user import UserSignUp, UserSignIn, AuthResponse
-from backend.services.auth_service import AuthService
-from backend.app.config import settings
+from fastapi import APIRouter, status
+from backend.app.schemas.user import UserSignUp, UserSignIn, AuthResponse
+from backend.app.services.auth_service import AuthService
+from backend.app.core.config import settings
 from supabase import create_client
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])

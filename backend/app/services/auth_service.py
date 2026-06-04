@@ -1,5 +1,5 @@
 from supabase import Client
-from backend.app.models.user import UserSignUp, UserSignIn, AuthResponse
+from backend.app.schemas.user import UserSignUp, UserSignIn, AuthResponse
 from fastapi import HTTPException, status
 
 class AuthService:

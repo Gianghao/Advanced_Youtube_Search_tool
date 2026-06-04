@@ -4,7 +4,7 @@ from backend.main import app
 
 client = TestClient(app)
 
-@patch("backend.api.auth_router.auth_service.supabase")
+@patch("backend.app.api.routes.auth_router.auth_service.supabase")
 def test_signup_success(mock_supabase):
     # Mocking supabase client auth sign_up response
     mock_user = MagicMock()
@@ -34,7 +34,7 @@ def test_signup_success(mock_supabase):
         }
     })
 
-@patch("backend.api.auth_router.auth_service.supabase")
+@patch("backend.app.api.routes.auth_router.auth_service.supabase")
 def test_signin_success(mock_supabase):
     # Mocking supabase client auth sign_in response
     mock_user = MagicMock()

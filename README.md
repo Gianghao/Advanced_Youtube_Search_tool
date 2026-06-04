@@ -1,79 +1,113 @@
-# Advance Youtube Search Tool 🚀
+# Advanced YouTube Search Tool 🚀
 
-Dự án công cụ tìm kiếm cảnh quay trong video YouTube tích hợp AI (AI Video Scene Search Engine). 
+An AI-powered Video Scene Search Engine designed to search for specific scenes inside YouTube videos.
 
-## 📂 Cấu trúc thư mục
+## 📂 Project Structure
 
 ```text
 .
-├── backend/                  # Chứa toàn bộ mã nguồn phía máy chủ (FastAPI)
-│   ├── api/                  # Các router định tuyến (VD: auth_router.py)
-│   ├── app/                  # Các cấu hình và model Pydantic
-│   │   ├── config.py         # Cấu hình biến môi trường
-│   │   └── models/           # Định nghĩa các schema dữ liệu (UserSignUp, UserSignIn...)
-│   ├── services/             # Logic xử lý nghiệp vụ (AuthService, Supabase interaction...)
-│   ├── static/               # Các file tĩnh (CSS, JS, hình ảnh)
-│   ├── templates/            # Các file HTML mẫu (Jinja2)
-│   ├── main.py               # File chạy ứng dụng FastAPI chính
-│   ├── .env.example          # File mẫu chứa các biến môi trường cần thiết
-│   └── .env                  # File chứa các key cấu hình (Không push lên Github)
-├── tests/                    # Thư mục chứa các bài kiểm thử (Pytest)
-│   └── test_auth.py          # Kiểm thử tính năng đăng nhập/đăng ký
-├── frontend/                 # Chứa mã nguồn giao diện người dùng (nếu có)
-├── pyproject.toml            # Cấu hình dự án (dependencies, pytest config)
-├── requirements.txt          # Danh sách tất cả các thư viện cần cài đặt
-└── setup.sh                  # Script tự động cài đặt môi trường
+├── backend/                  # Server-side codebase (FastAPI)
+│   ├── app/
+│   │   ├── api/              # API routing logic
+│   │   │   ├── routes/       # Specific router modules
+│   │   │   │   ├── auth_router.py   # Auth routes (SignUp/SignIn)
+│   │   │   │   ├── search_router.py # Search routes
+│   │   │   │   └── video_router.py  # Video routes (Upload/View)
+│   │   │   └── main.py       # API main router aggregator
+│   │   ├── core/
+│   │   │   └── config.py     # Environment variables and configuration
+│   │   ├── database/
+│   │   │   └── db.py         # DB connection setup
+│   │   ├── schemas/          # Pydantic data schemas (User, Video, etc.)
+│   │   └── services/         # Business logic services (Auth, Upload, etc.)
+│   ├── static/               # Static assets (CSS, JS, images)
+│   ├── templates/            # Jinja2 template files
+│   ├── main.py               # FastAPI application entry point
+│   ├── .env.example          # Environment variable template
+│   └── .env                  # Configuration keys (Ignored by Git)
+├── frontend/                 # User interface files
+│   └── app.py                # Main Streamlit web application
+├── tests/                    # Test suite (Pytest)
+│   ├── test_auth.py          # Authentication tests
+│   └── test_video.py         # Video upload and viewing tests
+├── pyproject.toml            # Project configurations (dependencies, pytest, etc.)
+├── requirements.txt          # Python dependencies list
+└── setup.sh                  # Shell script for automated environment setup
 ```
 
-## 🛠️ Hướng dẫn cài đặt & Khởi chạy (Dành cho người mới clone code về)
+## 🛠️ Installation & Setup
 
-Dự án này sử dụng môi trường Python ảo và các gói phụ thuộc được liệt kê trong file `requirements.txt`.
+This project uses a Python virtual environment and dependencies listed in `requirements.txt`.
 
-### Cách 1: Cài đặt tự động bằng Script (Khuyên dùng)
-Dành cho hệ điều hành Linux / MacOS hoặc môi trường Git Bash trên Windows:
+### Option 1: Automated Script (Recommended)
+Suitable for Linux / macOS, or Git Bash on Windows:
 
-1. Mở terminal tại thư mục gốc của dự án.
-2. Cấp quyền thực thi và chạy file cài đặt:
+1. Open your terminal at the root directory of the project.
+2. Grant execution permissions and run the setup script:
    ```bash
    chmod +x setup.sh
    ./setup.sh
    ```
-3. Sau khi chạy xong, script sẽ tự động tạo một file `backend/.env`. Bạn cần mở file này lên và điền thông tin **Supabase URL** và **Supabase Key** của bạn vào.
-4. Cuối cùng, khởi động server:
-   ```bash
-   uv run uvicorn backend.main:app --reload
+3. Once completed, a `.env` file will be generated at `backend/.env`. Open this file and fill in your actual **Supabase URL**, **Supabase Key**, and **Supabase Video Bucket**:
+   ```env
+   SUPABASE_URL='https://your-supabase-project.supabase.co'
+   SUPABASE_KEY='your-anon-key'
+   SUPABASE_VIDEO_BUCKET='video-bucket'
    ```
-   *(Server sẽ chạy tại `http://127.0.0.1:8000`)*
+   *(Note: Ensure Row-Level Security (RLS) is configured correctly or disabled for the `videos` table in Supabase, and make sure your storage bucket `video-bucket` is set to **Public**).*
+4. Run the project (see running instructions below).
 
-### Cách 2: Cài đặt thủ công bằng công cụ `uv` (Hoặc `pip`)
-1. Tạo môi trường ảo (Virtual Environment):
+### Option 2: Manual Installation using `uv` (or `pip`)
+1. Create a virtual environment:
    ```bash
    uv venv
-   # Kích hoạt môi trường (Linux/Mac):
+   # Activate environment (Linux/macOS):
    source .venv/bin/activate
-   # Kích hoạt môi trường (Windows):
+   # Activate environment (Windows):
    # .venv\Scripts\activate
    ```
-2. Cài đặt các thư viện cần thiết:
+2. Install the required dependencies:
    ```bash
    uv pip install -r requirements.txt
    ```
-3. Copy file môi trường:
+3. Copy the configuration template:
    ```bash
    cp backend/.env.example backend/.env
    ```
-   *Nhớ chỉnh sửa file `backend/.env` bằng key Supabase thật của bạn.*
-4. Chạy dự án:
-   ```bash
-   uv run uvicorn backend.main:app --reload
-   ```
+   *Remember to configure `backend/.env` with your actual Supabase credentials.*
 
-## 🧪 Hướng dẫn chạy Test (Kiểm thử)
-Dự án đã được cấu hình tự động nhận diện `PYTHONPATH`. Bạn có thể chạy tất cả các bài kiểm thử (không yêu cầu Supabase thật vì đã sử dụng Mock):
+---
+
+## 🚀 Running the Application
+
+To interact with the app, you need to start both the FastAPI backend and the Streamlit frontend.
+
+### 1. Run the Backend
+From the root directory:
+```bash
+uv run uvicorn backend.main:app --reload
+```
+The API server will run at `http://localhost:8000`.
+
+### 2. Run the Frontend
+In a new terminal window (ensure the virtual environment is activated):
+```bash
+streamlit run frontend/app.py
+```
+The Streamlit app will launch and open in your default browser at `http://localhost:8501`.
+
+---
+
+## 🧪 Running Unit Tests
+Unit tests use `pytest` with mocked Supabase clients (no active Supabase connection is required to run tests):
+
+Run the entire test suite:
 ```bash
 uv run pytest
 ```
-Hoặc test riêng một file:
+
+Run specific tests (e.g., authentication or video functionality):
 ```bash
 uv run pytest tests/test_auth.py
+uv run pytest tests/test_video.py
 ```
