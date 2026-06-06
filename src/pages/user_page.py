@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from streamlit_option_menu import option_menu
 from authenticate import change_password, change_email, delete_account
@@ -95,8 +96,9 @@ elif selected == "You":
             if submitted:
                 if new_email != email and change_email(email, new_email, current_password):
                     st.success("You changed your email successfully!")
-                    st.session_state.user_email = new_email
+                    st.session_state.user_email = new_email                
                     st.session_state.settings_mode = None
+                    time.sleep(2)
                     st.rerun()
                 else:
                     st.error("Failed, check your password")
@@ -124,6 +126,7 @@ elif selected == "You":
                 elif change_password(email, current_password, new_password):
                     st.success("You successfully changed your password")
                     st.session_state.settings_mode = None
+                    time.sleep(2)
                     st.rerun()
                 else:
                     st.error("Failed, checked current password")
@@ -160,7 +163,7 @@ elif selected == "You":
                     st.rerun()
 
         st.divider()
-        if st.button("⬅️Close setting", type="secondary"):
+        if st.button("⬅️Close menu", type="secondary"):
             st.session_state.show_settings = False
             st.session_state.settings_mode = None
             st.rerun()

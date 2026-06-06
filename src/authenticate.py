@@ -22,12 +22,12 @@ def login_user(email, password):
 
     return None
 
-def change_password(email, new_password):
+def change_password(email, current_password, new_password):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-        "UPDATE account SET password = %s WHERE email = %s",(new_password,email))
+        "UPDATE account SET password = %s WHERE email = %s AND password = %s",(new_password,email, current_password))
 
         conn.commit() #luu thay doi vao db
 
@@ -36,12 +36,12 @@ def change_password(email, new_password):
         conn.rollback() #huy thay doi
         return False, str(e)
     
-def change_email(old_email, new_email):
+def change_email(old_email, new_email, password):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-        "UPDATE account SET email = %s WHERE email = %s",(new_email,old_email))
+        "UPDATE account SET email = %s WHERE email = %s AND password = %s",(new_email,old_email, password))
 
         conn.commit() #luu thay doi vao db
 
