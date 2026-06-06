@@ -49,3 +49,24 @@ def change_email(old_email, new_email):
     except Exception as e:
         conn.rollback() #huy thay doi
         return False, str(e)
+    
+def delete_account(email, password):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(
+        "SELECT password FROM account WHERE email = %s",
+        (email,)
+    )
+    result = cursor.fetchone()
+    
+    if result and result[0] == password:
+        cursor.execute("DELETE FROM account WHERE email = %s", (email,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    
+    cursor.close()
+    conn.close()
+    return False

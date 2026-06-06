@@ -6,22 +6,44 @@ sys.path.append(str(src_path))
 
 from authenticate import login_user
 
-st.header("Login page 🔒")
+st.markdown("""
+    <style>
+        .stApp {
+            background-color: #C2DFFF;
+        }
+        .stForm{
+            background-color: white
+            }
+        .block-container {
+            max-width: 800px;
+            padding: 2rem;
+            margin: auto;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+c1, c2, c3 = st.columns([6,9,2])
+with c2:
+    st.header("Login page")
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 with st.form("login_form"): #form enter to submit = true    
 
-    email = st.text_input("Email", placeholder="nhập email ở đây 👇")
+    email = st.text_input("Email", placeholder="Email")
 
-    password = st.text_input("Password", type='password', placeholder="nhập password ở đây 👇")
+    password = st.text_input("Password", type='password', placeholder="password")
 
-    button_clicked = st.form_submit_button("Log in")
+    c1, c2, c3 = st.columns([7,5,5])
+    with c2:
+        button_clicked = st.form_submit_button("Log in")
 
 if button_clicked:
     name = login_user(email, password)
-    if name:
+    if not email or not password:
+        st.warning("Please fill in both fields.")
+    elif name:
         st.success("login success")
         st.session_state.logged_in = True
         st.session_state.user_email = email
@@ -30,6 +52,3 @@ if button_clicked:
     else:
         st.error("username or password is incorrect")
 
-st.divider()
-
-st.button("Login with google")
