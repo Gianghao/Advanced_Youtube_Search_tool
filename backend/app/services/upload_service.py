@@ -33,7 +33,7 @@ class UploadService:
                 "video_id": video_id,
                 "title": title,
                 "video_url": public_url,
-                "status": "uploaded",
+                "status": "processing",
                 "user_id": user_id,
                 "timestamp": datetime.now().isoformat()
             }

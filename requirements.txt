@@ -26,7 +26,10 @@ markupsafe==3.0.3
 mdurl==0.1.2
 mmh3==5.2.1
 multidict==6.7.1
+numpy
+opencv-python-headless
 packaging==26.2
+Pillow
 pluggy==1.6.0
 postgrest==2.30.0
 propcache==0.5.2
@@ -46,6 +49,8 @@ python-multipart==0.0.29
 realtime==2.30.0
 requests==2.34.2
 rich==14.3.4
+scenedetect[opencv]
+sentence-transformers
 six==1.17.0
 starlette==1.2.0
 storage3==2.30.0
@@ -59,6 +64,7 @@ typing-extensions==4.15.0
 typing-inspection==0.4.2
 urllib3==2.7.0
 uvicorn==0.48.0
+vecs
 websockets==15.0.1
 yarl==1.24.2
 zstandard==0.25.0
