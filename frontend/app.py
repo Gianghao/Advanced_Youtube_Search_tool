@@ -196,37 +196,54 @@ else:
         st.markdown("## 🔍 Search Video Content")
         st.markdown("Enter a description of the scene or content you want to search (in English or Vietnamese).")
 
-        col_input, col_topk = st.columns([4, 1])
-        with col_input:
-            query = st.text_input(
-                "Search Query",
-                placeholder="e.g., a person walking on the street, crowd...",
-                value=st.session_state.search_query,
-                label_visibility="collapsed",
+        # Use a form to group inputs and avoid immediate reruns
+        st.markdown("""
+            <style>
+                div[data-testid="stForm"] {
+                    border: none;
+                    padding: 0;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+        with st.form("search_form"):
+            col_input, col_topk, col_search = st.columns([3, 1, 1])
+            with col_input:
+                query = st.text_input(
+                    "Search Query",
+                    placeholder="e.g., a person walking on the street, crowd...",
+                    value=st.session_state.search_query,                 
+                )
+            with col_topk:
+                top_k = st.number_input(
+                "Top K results",
+                min_value=1,
+                max_value=20,
+                value=5,
+                placeholder="Top K results",  
             )
-        with col_topk:
-            top_k = st.number_input("Top K results", min_value=1, max_value=20, value=5)
 
-        search_btn = st.button("🔍 Search", type="primary", use_container_width=True)
+            with col_search:
+                st.markdown("<br>", unsafe_allow_html=True)
+                search_submitted = st.form_submit_button("🔍 Search")
 
-        if search_btn and query.strip():
-            with st.spinner("Searching..."):
-                try:
-                    response = requests.post(
-                        f"{BACKEND_URL}/search/",
-                        json={"query": query, "top_k": top_k},
-                        timeout=60,
-                    )
-                    response.raise_for_status()
-                    st.session_state.search_results = response.json()
-                    st.session_state.search_query = query
-                except requests.exceptions.RequestException as e:
-                    st.error(f"Search failed: {e}")
-                    st.session_state.search_results = []
-                    st.session_state.search_query = ""
-
-        elif search_btn:
-            st.warning("Please enter a search query.")
+        if search_submitted:
+            if not query.strip():
+                st.warning("Please enter a search query.")
+            else:
+                with st.spinner("Searching..."):
+                    try:
+                        response = requests.post(
+                            f"{BACKEND_URL}/search/",
+                            json={"query": query, "top_k": top_k},
+                            timeout=60,
+                        )
+                        response.raise_for_status()
+                        st.session_state.search_results = response.json()
+                        st.session_state.search_query = query
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"Search failed: {e}")
+                        st.session_state.search_results = []
+                        st.session_state.search_query = ""
 
         # Render stored search results (persists during video play reruns)
         if st.session_state.search_results is not None:
