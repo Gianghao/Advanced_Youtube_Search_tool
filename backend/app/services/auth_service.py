@@ -39,4 +39,5 @@ class AuthService:
                 username=username
             )
         except Exception as e:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong credentials!")
+            print(f"Login error: {str(e)}")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Wrong credentials! Error: {str(e)}")
