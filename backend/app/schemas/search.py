@@ -5,6 +5,10 @@ class SearchRequest(BaseModel):
     query: str
     top_k: int = 5
 
+class VideoSearchRequest(BaseModel):
+    query: str
+    top_k: int = 5
+    search_type: str = "title"
 
 class SearchResult(BaseModel):
     video_id: str
@@ -21,3 +25,9 @@ class SearchResult(BaseModel):
         minutes = total_sec // 60
         seconds = total_sec % 60
         return f"{minutes:02d}:{seconds:02d}"
+
+class VideoSearchResult(BaseModel):
+    video_id: str
+    title: str
+    video_url: str
+    

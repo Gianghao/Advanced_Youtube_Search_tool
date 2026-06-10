@@ -11,6 +11,7 @@ import vecs
 from supabase import Client
 
 from backend.app.schemas.search import SearchResult
+from backend.app.schemas.search import VideoSearchResult
 
 logger = logging.getLogger(__name__)
 
@@ -86,3 +87,29 @@ class SearchService:
 
         logger.info(f"[Search] Trả về {len(results)} kết quả")
         return results
+    
+    def search_video_by_title(self, query: str, top_k: int = 5) -> list [VideoSearchResult]:
+    
+        logger.info(f"[Search] Title search: '{query}', top_k={top_k}")
+        try:
+            response = (
+                self.supabase
+                .table("videos")
+                .select("video_id, title, video_url")  # was "id" — must match your actual column name
+                .ilike("title", f"%{query}%")
+                .limit(top_k)
+                .execute()
+            )
+            results = [
+                VideoSearchResult(
+                    video_id=v.get("video_id", ""),
+                    title=v.get("title", "Unknown"),
+                    video_url=v.get("video_url", "")
+                )
+                for v in response.data
+            ]
+            logger.info(f"[Search] Found {len(results)} videos by title")
+            return results
+        except Exception as e:
+            logger.error(f"[Search] Title search error: {e}")
+            return [] 

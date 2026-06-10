@@ -206,6 +206,9 @@ else:
             </style>
         """, unsafe_allow_html=True)
         with st.form("search_form"):
+            # Added radio button to select search type
+            search_type = st.radio("Search By:", ["Content", "Title"], horizontal=True)
+            
             col_input, col_topk, col_search = st.columns([3, 1, 1])
             with col_input:
                 query = st.text_input(
@@ -232,8 +235,14 @@ else:
             else:
                 with st.spinner("Searching..."):
                     try:
+                        # Pick the correct endpoint based on search type
+                        endpoint = (
+                            f"{BACKEND_URL}/search/title"
+                            if search_type == "Title"
+                            else f"{BACKEND_URL}/search/"
+                        )
                         response = requests.post(
-                            f"{BACKEND_URL}/search/",
+                            endpoint,
                             json={"query": query, "top_k": top_k},
                             timeout=60,
                         )
@@ -271,39 +280,55 @@ else:
                 cols = st.columns(2)
                 for idx, result in enumerate(results):
                     with cols[idx % 2]:
-                        ts = format_timestamp(result["timestamp_seconds"])
-                        sim_pct = round(result["similarity"] * 100, 1)
+                        # --- RENDER TITLE SEARCH ---
+                        if search_type == "Title":
+                            st.video(result["video_url"])
+                            
+                            sim_pct = round(result.get("similarity", 0) * 100, 1) if "similarity" in result else None
+                            
+                            st.markdown(f"""
+                            <div class="result-card">
+                                <div class="result-title">🎬 {result['title']}</div>
+                                {"""<div class="result-meta"><span class="similarity-badge">🎯 """ + str(sim_pct) + """%</span></div>""" if sim_pct else ""}
+                            </div>
+                            """, unsafe_allow_html=True)
+                            st.markdown("<br>", unsafe_allow_html=True)
 
-                        # Frame thumbnail
-                        if result.get("frame_url"):
-                            try:
-                                st.image(result["frame_url"], use_container_width=True)
-                            except Exception:
-                                st.markdown("🎞️ *Frame unavailable*")
+                        # --- RENDER CONTENT SEARCH ---
+                        else:
+                            ts = format_timestamp(result["timestamp_seconds"])
+                            sim_pct = round(result["similarity"] * 100, 1)
 
-                        # Card info
-                        st.markdown(f"""
-<div class="result-card">
-    <div class="result-title">🎬 {result['title']}</div>
-    <div class="result-meta">
-        🕐 Timestamp: <strong>{ts}</strong> &nbsp;|&nbsp;
-        <span class="similarity-badge">🎯 {sim_pct}%</span>
+                            # Frame thumbnail
+                            if result.get("frame_url"):
+                                try:
+                                    st.image(result["frame_url"], use_container_width=True)
+                                except Exception:
+                                    st.markdown("🎞️ *Frame unavailable*")
+
+                            # Card info
+                            st.markdown(f"""
+    <div class="result-card">
+        <div class="result-title">🎬 {result['title']}</div>
+        <div class="result-meta">
+            🕐 Timestamp: <strong>{ts}</strong> &nbsp;|&nbsp;
+            <span class="similarity-badge">🎯 {sim_pct}%</span>
+        </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-                        # Play button
-                        if st.button(
-                            f"▶ Play from {ts}",
-                            key=f"play_{idx}_{result['video_id']}_{result['timestamp_seconds']}",
-                            use_container_width=True,
-                        ):
-                            st.session_state.playing_video = {
-                                "url": result["video_url"],
-                                "start_time": result["timestamp_seconds"],
-                                "title": result["title"],
-                            }
-                            st.rerun()
+                            # Play button
+                            if st.button(
+                                f"▶ Play from {ts}",
+                                key=f"play_{idx}_{result['video_id']}_{result['timestamp_seconds']}",
+                                use_container_width=True,
+                            ):
+                                st.session_state.playing_video = {
+                                    "url": result["video_url"],
+                                    "start_time": result["timestamp_seconds"],
+                                    "title": result["title"],
+                                }
+                                st.rerun()
 
     # ===================== PAGE: VIEW VIDEOS =====================
     elif page == "🎬 Video List":
