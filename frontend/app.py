@@ -184,7 +184,7 @@ else:
         st.divider()
         page = st.radio(
             "Navigation",
-            ["🔍 Search Videos", "🎬 Video List", "⬆️ Upload Video"],
+            ["🔍 Search Videos", "🎬 Video List", "⬆️ Upload Video", "👤 User Profile"],
             label_visibility="collapsed",
         )
         st.divider()
@@ -384,3 +384,98 @@ else:
                             st.error(f"Upload failed: {e}")
                             if hasattr(e, "response") and e.response is not None:
                                 st.error(f"Server: {e.response.text}")
+
+    # ===================== PAGE: USER PROFILE =====================
+    elif page == "👤 User Profile":
+        st.markdown("## 👤 User Profile")
+        
+        tab1, tab2, tab3 = st.tabs(["Profile Info", "Change Password", "My Videos"])
+        
+        with tab1:
+            st.markdown("### Profile Information")
+            st.markdown(f"**Email:** {user['email']}")
+            
+            with st.form("update_username_form"):
+                new_username = st.text_input("Username", value=user['username'], max_chars=20)
+                submit_username = st.form_submit_button("Update Username", use_container_width=True)
+                if submit_username:
+                    if not new_username or len(new_username) < 3:
+                        st.warning("Username must be at least 3 characters.")
+                    elif new_username == user['username']:
+                        st.info("Username is the same.")
+                    else:
+                        with st.spinner("Updating username..."):
+                            try:
+                                response = requests.put(
+                                    f"{BACKEND_URL}/user/username",
+                                    json={"user_id": user["user_id"], "new_username": new_username}
+                                )
+                                response.raise_for_status()
+                                st.session_state.user['username'] = new_username
+                                st.success("Username updated successfully!")
+                                st.rerun()
+                            except requests.exceptions.RequestException as e:
+                                st.error("Failed to update username.")
+                                if hasattr(e, "response") and e.response is not None:
+                                    st.error(f"Details: {e.response.text}")
+        
+        with tab2:
+            st.markdown("### Change Password")
+            with st.form("change_password_form"):
+                old_password = st.text_input("Current Password", type="password")
+                new_password = st.text_input("New Password (min 6 characters)", type="password")
+                confirm_password = st.text_input("Confirm New Password", type="password")
+                submit_password = st.form_submit_button("Change Password", use_container_width=True)
+                
+                if submit_password:
+                    if not old_password or not new_password or not confirm_password:
+                        st.warning("Please fill in all fields.")
+                    elif new_password != confirm_password:
+                        st.error("New passwords do not match.")
+                    elif len(new_password) < 6:
+                        st.error("New password must be at least 6 characters.")
+                    else:
+                        with st.spinner("Changing password..."):
+                            try:
+                                response = requests.put(
+                                    f"{BACKEND_URL}/user/password",
+                                    json={"email": user["email"], "old_password": old_password, "new_password": new_password}
+                                )
+                                response.raise_for_status()
+                                st.success("Password changed successfully!")
+                            except requests.exceptions.RequestException as e:
+                                st.error("Failed to change password. Please check your current password.")
+                                if hasattr(e, "response") and e.response is not None:
+                                    st.error(f"Details: {e.response.text}")
+        
+        with tab3:
+            st.markdown("### My Uploaded Videos")
+            col_refresh, _ = st.columns([1, 5])
+            with col_refresh:
+                if st.button("🔄 Refresh My Videos", key="refresh_my_videos"):
+                    st.rerun()
+                    
+            with st.spinner("Loading your videos..."):
+                try:
+                    response = requests.get(f"{BACKEND_URL}/videos/user/{user['user_id']}")
+                    response.raise_for_status()
+                    my_videos = response.json()
+                except requests.exceptions.RequestException as e:
+                    st.error("Could not load your videos.")
+                    my_videos = []
+                    
+            if not my_videos:
+                st.info("You haven't uploaded any videos yet.")
+            else:
+                cols = st.columns(3)
+                for i, video in enumerate(my_videos):
+                    with cols[i % 3]:
+                        st.video(video["video_url"])
+                        st.markdown(f"**{video['title']}**")
+                        st.markdown(status_badge(video.get("status", "")), unsafe_allow_html=True)
+                        try:
+                            dt = datetime.fromisoformat(video["timestamp"])
+                            st.caption(f"📅 {dt.strftime('%Y-%m-%d %H:%M')}")
+                        except Exception:
+                            st.caption(f"📅 {video.get('timestamp', '')}")
+                        st.divider()

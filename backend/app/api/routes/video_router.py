@@ -51,3 +51,8 @@ async def upload_video(
 async def get_all_videos():
     """Get all videos (newest first)."""
     return await upload_service.get_all_videos()
+
+@router.get("/user/{user_id}", response_model=List[VideoResponse])
+async def get_user_videos(user_id: str):
+    """Get videos uploaded by a specific user."""
+    return await upload_service.get_videos_by_user(user_id)

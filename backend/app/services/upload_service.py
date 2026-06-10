@@ -50,3 +50,10 @@ class UploadService:
             return response.data
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    async def get_videos_by_user(self, user_id: str):
+        try:
+            response = self.supabase.table("videos").select("*").eq("user_id", user_id).order("timestamp", desc=True).execute()
+            return response.data
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
