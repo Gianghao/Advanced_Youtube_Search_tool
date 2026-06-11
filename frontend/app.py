@@ -467,6 +467,7 @@ else:
             if not my_videos:
                 st.info("You haven't uploaded any videos yet.")
             else:
+                # Display videos in 3 columns
                 cols = st.columns(3)
                 for i, video in enumerate(my_videos):
                     with cols[i % 3]:
@@ -478,4 +479,54 @@ else:
                             st.caption(f"📅 {dt.strftime('%Y-%m-%d %H:%M')}")
                         except Exception:
                             st.caption(f"📅 {video.get('timestamp', '')}")
+
+                        # ---- NEW: Edit and Delete buttons ----
+                        col_btn1, col_btn2 = st.columns(2)
+                        with col_btn1:
+                            if st.button("✏️ Edit", key=f"edit_{video['video_id']}"):
+                                # Open a dialog to edit title
+                                with st.popover("Edit Video Title", use_container_width=True):
+                                    new_title = st.text_input("New title", value=video['title'])
+                                    if st.button("Save", key=f"save_{video['video_id']}"):
+                                        if not new_title.strip():
+                                            st.error("Title cannot be empty.")
+                                        else:
+                                            with st.spinner("Updating..."):
+                                                try:
+                                                    # Backend expects form data
+                                                    update_data = {
+                                                        "title": new_title,
+                                                        "user_id": user["user_id"]
+                                                    }
+                                                    resp = requests.put(
+                                                        f"{BACKEND_URL}/videos/{video['video_id']}",
+                                                        data=update_data
+                                                    )
+                                                    resp.raise_for_status()
+                                                    st.success("Title updated!")
+                                                    st.rerun()
+                                                except Exception as e:
+                                                    st.error(f"Update failed: {e}")
+
+                        with col_btn2:
+                            if st.button("🗑️ Delete", key=f"delete_{video['video_id']}"):
+                                # Confirm before deleting
+                                confirm = st.checkbox(
+                                    f"I confirm deletion of '{video['title']}'",
+                                    key=f"confirm_{video['video_id']}"
+                                )
+                                if confirm:
+                                    with st.spinner("Deleting video..."):
+                                        try:
+                                            delete_data = {"user_id": user["user_id"]}
+                                            resp = requests.delete(
+                                                f"{BACKEND_URL}/videos/{video['video_id']}",
+                                                data=delete_data
+                                            )
+                                            resp.raise_for_status()
+                                            st.success("Video deleted!")
+                                            st.rerun()
+                                        except Exception as e:
+                                            st.error(f"Delete failed: {e}")
+
                         st.divider()
