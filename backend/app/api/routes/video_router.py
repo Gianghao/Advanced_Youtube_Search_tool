@@ -1,3 +1,5 @@
+from backend.app.services.delete_service import DeleteService
+from backend.app.services.update_service import UpdateService
 from fastapi import APIRouter, status, UploadFile, File, Form, BackgroundTasks
 from typing import List
 from backend.app.services.upload_service import UploadService
@@ -10,6 +12,8 @@ router = APIRouter(prefix="/videos", tags=["Videos"])
 
 supabase_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 upload_service = UploadService(supabase_client)
+update_service = UpdateService(supabase_client)
+delete_service = DeleteService(supabase_client)
 
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED, response_model=VideoResponse)
@@ -56,3 +60,24 @@ async def get_all_videos():
 async def get_user_videos(user_id: str):
     """Get videos uploaded by a specific user."""
     return await upload_service.get_videos_by_user(user_id)
+
+
+
+@router.put("/{video_id}", response_model=VideoResponse)
+async def update_video(
+    video_id: str,
+    title: str = Form(...),
+    user_id: str = Form(...),
+):
+    """Update video title."""
+    return await update_service.update_video(video_id, title, user_id)
+
+
+@router.delete("/{video_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_video(
+    video_id: str,
+    user_id: str = Form(...),
+):
+    """Delete video and all associated data."""
+    await delete_service.delete_video(video_id, user_id)
+    return
